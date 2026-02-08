@@ -6,7 +6,7 @@ from careapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
+    path('index/', views.index, name='index'),
     path('starter/', views.starter, name='starter'),
     path('service-details/', views.service_details, name='service_details'),
     path('about/', views.about, name='about'),
@@ -25,5 +25,7 @@ urlpatterns = [
     path('delete/<int:id>', views.delete ),
     
     path('edit/<int:id>', views.edit ),
+
+    path('', views.register, name='register'),
 
 ]

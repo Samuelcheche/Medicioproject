@@ -1,3 +1,5 @@
+
+from django.contrib.auth.models import User
 from django.shortcuts import render,redirect,get_object_or_404
 from careapp.models import *
 from django.contrib import messages
@@ -76,3 +78,47 @@ def edit(request,id):
         return render(request, 'edit.html')
     
     return render(request, 'edit.html', {'editappointment' : editappointment} )
+
+
+def register(request):
+    """ Show the registration form """
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+
+        # Check the password
+        if password == confirm_password:
+            try:
+                user = User.objects.create_user(username=username, password=password)
+                user.save()
+
+                # Display a message
+                messages.success(request, "Account created successfully")
+                return redirect('/')
+            except:
+                # Display a message if the above fails
+                messages.error(request, "Username already exist")
+        else:
+            # Display a message saying passwords don't match
+            messages.error(request, "Passwords do not match")
+
+    return render(request, 'register.html')
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
