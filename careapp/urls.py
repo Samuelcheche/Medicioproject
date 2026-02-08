@@ -27,5 +27,8 @@ urlpatterns = [
     path('edit/<int:id>', views.edit ),
 
     path('', views.register, name='register'),
+    
+    path('login/', views.login_user, name='login'),
+
 
 ]

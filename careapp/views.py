@@ -1,4 +1,5 @@
-
+from urllib import request
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.shortcuts import render,redirect,get_object_or_404
 from careapp.models import *
@@ -106,7 +107,28 @@ def register(request):
     return render(request, 'register.html')
 
    
+def login_user(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
 
+        user = authenticate(request, username=username, password=password)
+
+        # Check if the user exists
+        if user is not None:
+            # login(request, user)
+            login(request, user)
+            messages.success(request, "You are now logged in!")
+            # Admin
+            if user.is_superuser:
+                return redirect('/appointment')
+
+            # For Normal Users
+            return redirect('/index')
+        else:
+            messages.error(request, "Invalid login credentials")
+
+    return render(request, 'login.html')
 
 
 
