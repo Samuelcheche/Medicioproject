@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+import dj_database_url  # You may need to 'pip install dj-database-url' if you use a real DB later
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +22,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=fq1k152qm715tj8u=1k16h70omr_t5+fjj$m-e_+yb%3o)7n7'
+# Ideally, retrieve this from environment variables in production
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-=fq1k152qm715tj8u=1k16h70omr_t5+fjj$m-e_+yb%3o)7n7')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# This sets DEBUG to False if you are on Render, helping security
+DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = []
+# Allow all hosts (simplest for Render deployment)
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,11 +42,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'careapp'
+    'careapp', # Your custom app
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # <--- REQUIRED FOR RENDER CSS
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -55,7 +61,7 @@ ROOT_URLCONF = 'Caresoko.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': ['templates'], # Ensure this folder exists in your root
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,6 +85,10 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# This automatically switches to PostgreSQL if on Render and DATABASE_URL is set
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
 
 
 # Password validation
@@ -116,15 +126,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# This tells Django where to look for static files locally
 STATICFILES_DIRS = [
-    BASE_DIR, "static"
+    os.path.join(BASE_DIR, 'static'),
 ]
 
+# This is where Django will put all files when "collectstatic" runs on Render
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# This enables WhiteNoise compression and caching
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
